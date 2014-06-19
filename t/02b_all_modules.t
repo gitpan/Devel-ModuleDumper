@@ -1,11 +1,6 @@
 use strict;
 use warnings;
-
-BEGIN {
-    $ENV{MODULEDUMPER_SHOW_ALL} = 1;
-}
-
-use Devel::ModuleDumper;
+use Devel::ModuleDumper qw/showall/;
 use Test::More;
 use Capture::Tiny qw/capture_stdout/;
 

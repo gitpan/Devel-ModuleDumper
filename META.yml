@@ -17,11 +17,11 @@ name: Devel-ModuleDumper
 provides:
   Devel::ModuleDumper:
     file: lib/Devel/ModuleDumper.pm
-    version: 0.01
+    version: 0.02
 requires:
   perl: 5.008001
 resources:
   bugtracker: http://github.com/bayashi/Devel-ModuleDumper/issues
   license: http://dev.perl.org/licenses/
   repository: http://github.com/bayashi/Devel-ModuleDumper
-version: 0.01
+version: 0.02

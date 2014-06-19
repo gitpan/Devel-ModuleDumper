@@ -7,7 +7,7 @@ BEGIN {
     %seen = %INC;
 }
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 our %pragmas;
 for my $pragma (qw/
@@ -47,7 +47,25 @@ my $ALL = $ENV{MODULEDUMPER_SHOW_ALL};
 
 our $SHOWN = 0;
 
+my $CONF;
+sub import {
+    my ($class) = shift;
+
+    for my $opt (@_) {
+        next unless $opt;
+        if ($opt =~ m!^(show(?:all|seen|pragma|pragmas|skip|skips|pl))$!) {
+            $CONF->{$1} = 1;
+            next;
+        }
+        if ($opt eq '-stderr') {
+            $CONF->{'-stderr'} = 1;
+        }
+    }
+}
+
 sub show {
+    my $self = shift;
+
     my $result = '';
 
     return $result if $SHOWN;
@@ -69,18 +87,24 @@ sub _get_module_information {
     my %modules;
     for my $module_path (keys %INC) {
         my $class = _path2class($module_path);
-        unless ($ALL) {
-            next if $seen{$module_path}
-                        || $module_path !~ m!\.pm$!
-                        || $pragmas{$class}
-                        || $skips{$class}
-                        || $class eq __PACKAGE__;
+        if (!$ALL && !$CONF->{showall}) {
+            next if _skip_to_show($module_path, $class);
         }
         $modules{$class} = {
             version => _get_version($class),
         };
     }
     return \%modules;
+}
+
+sub _skip_to_show {
+    my ($module_path, $class) = @_;
+
+    return 1 if (!$CONF->{showseen} && $seen{$module_path})
+                || (!$CONF->{showpl} && $module_path !~ m!\.pm$!)
+                || ((!$CONF->{showpragma} && !$CONF->{showpragmas}) && $pragmas{$class})
+                || ((!$CONF->{skip} && !$CONF->{skips}) && $skips{$class})
+                || $class eq __PACKAGE__;
 }
 
 sub _path2class {
@@ -111,12 +135,14 @@ sub _get_version {
 }
 
 END {
-    my $info = show();
-    print $info;
+    my $info = __PACKAGE__->show;
+    my $out = $CONF->{'-stderr'} ? *STDERR : *STDOUT;
+    print $out "$info";
 }
 
 package # hide the package from the PAUSE indexer
     DB;
+no warnings 'redefine'; ## no critic
 sub DB {}
 
 1;
@@ -207,6 +233,49 @@ By default, some modules are filtered. If you set C<MODULEDUMPER_SHOW_ALL=1>, al
 =back
 
 
+=head1 OPTIONS
+
+If you set options at loading, then the modules will be shown what you want.
+
+    $ perl -d:ModuleDumper=option1[,option2...] your_script.pl
+
+or
+
+    $ perl -M:Devel::ModuleDumper=option1[,option2...] your_script.pl
+
+or
+
+    use Devel::ModuleDumper qw/option1[ option2...]/;
+
+=over
+
+=item B<all>
+
+show all modules. same as C<MODULEDUMPER_SHOW_ALL> environment.
+
+=item B<seen>
+
+show modules which are loaded at BEGIN phase.
+
+=item B<pragma>
+
+Actually, typical pragma modules are filtered by default. If you give C<pragma> option, then the pragma modules will be shown.
+
+=item B<skip>
+
+Several modules are filtered. If you give C<skip> option, then these modules will be shown.
+
+=item B<pl>
+
+Sometime, you can find C<*.pl> module(script) in loaded modules. These are filtered by default. If you give C<pl> option, then these modules will be shown.
+
+=item B<-stderr>
+
+By default, dump result is put to STDOUT. If you want to switch STDOUT to STDERR, you set C<-stderr> option.
+
+=back
+
+
 =head1 METHOD
 
 =over
@@ -228,6 +297,11 @@ Welcome your patches and issues :D
 =head1 AUTHOR
 
 Dai Okabayashi E<lt>bayashi@cpan.orgE<gt>
+
+
+=head1 SEE ALSO
+
+L<Devel::Loaded>, L<Devel::Modlist>, L<Devel::VersionDump>, L<Module::PrintUsed>
 
 
 =head1 LICENSE

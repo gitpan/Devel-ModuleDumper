@@ -1,11 +1,6 @@
 use strict;
 use warnings;
-
-BEGIN {
-    $ENV{MODULEDUMPER_SHOW_ALL} = 1;
-}
-
-use Devel::ModuleDumper;
+use Devel::ModuleDumper qw/showseen/;
 use Test::More;
 use Capture::Tiny qw/capture_stdout/;
 
@@ -15,7 +10,7 @@ like $stdout, qr/^Perl\t\d+/;
 like $stdout, qr/Test::More\t\d+/;
 like $stdout, qr/Capture::Tiny\t\d+/;
 
-like $stdout, qr/strict\t\d+/;
+like $stdout, qr/Exporter\t\d+/;
 
 if ($ENV{AUTHOR_TEST}) {
     note $stdout;
