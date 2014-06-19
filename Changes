@@ -1,5 +1,8 @@
 Revision history for Perl extension Devel::ModuleDumper
 
+0.03    Thu Jun 19 09:32:06 JST 2014
+        - fix POD
+
 0.02    Thu Jun 19 09:08:16 JST 2014
         - load options feature
         - add env:MODULEDUMPER_SHOW_ALL

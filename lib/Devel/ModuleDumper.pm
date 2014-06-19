@@ -7,7 +7,7 @@ BEGIN {
     %seen = %INC;
 }
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 our %pragmas;
 for my $pragma (qw/
@@ -226,7 +226,7 @@ All you need to do is add C<-d:ModuleDumper>.
 
 =over
 
-=item MODINFO_SHOW_ALL
+=item MODULEDUMPER_SHOW_ALL
 
 By default, some modules are filtered. If you set C<MODULEDUMPER_SHOW_ALL=1>, all module information will output.
 
